@@ -24,13 +24,19 @@ Instagram Post URL example: https://www.instagram.com/p/BnN7whpBHwC/
 
 **/
 
-async function getImageURL(postURL) {
+async function getImageURL(postID) {
   const browser = await puppeteer.launch({headless: true});
   const page = await browser.newPage();
+  let postURL = `https://www.instagram.com/p/${postID}/`;
   await page.goto(postURL);
 
   const imgURL = await page.evaluate(() => {
-    return document.querySelector('img.FFVAD').src;
+    let imgElement = document.querySelector('img.FFVAD');
+    if (imgElement !== null) {
+      return document.querySelector('img.FFVAD').src;
+    } else {
+      return "Cannot find the image requested. Are you sure the post ID is correct?"
+    }
   });
 
   await browser.close();

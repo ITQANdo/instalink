@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/itqando/instalink#readme",
   "dependencies": {
-    "puppeteer": "^1.8.0"
+    "puppeteer": "^1.8.0",
+    "request": "^2.88.0"
   }
 }
