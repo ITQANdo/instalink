@@ -1,5 +1,5 @@
 const instalink = require('./instalink');
 
-instalink.getURL('BnOefCyhYrrr').then((r) => {
+instalink.getURL('BnOefCyhYrr').then((r) => {
   console.log(r);
 });

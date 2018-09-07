@@ -33,9 +33,9 @@ async function getImageURL(postID) {
   const imgURL = await page.evaluate(() => {
     let imgElement = document.querySelector('img.FFVAD');
     if (imgElement !== null) {
-      return document.querySelector('img.FFVAD').src;
+      return {"status": "OK", "Message": document.querySelector('img.FFVAD').src};
     } else {
-      return "Cannot find the image requested. Are you sure the post ID is correct?"
+      return {"status": "ERROR", "Message": "Cannot find the image requested. Are you sure the post ID is correct?"}
     }
   });
 
