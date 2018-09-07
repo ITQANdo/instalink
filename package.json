@@ -1,0 +1,30 @@
+{
+  "name": "instalink",
+  "version": "1.0.0",
+  "description": "Simple NMP module to return URL for an instagram post image.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itqando/instalink.git"
+  },
+  "keywords": [
+    "Instagram",
+    "Link",
+    "Image",
+    "URL",
+    "Download",
+    "API"
+  ],
+  "author": "ITQAN.do",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/itqando/instalink/issues"
+  },
+  "homepage": "https://github.com/itqando/instalink#readme",
+  "dependencies": {
+    "puppeteer": "^1.8.0"
+  }
+}
