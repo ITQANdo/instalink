@@ -2,6 +2,15 @@
 
 const instalink = require('./index');
 
-instalink.getURL('BnOefCyhYrr').then((r) => {
+
+
+async function fetchImageInfo() {
+  await instalink.init();
+  let r = await instalink.imageInfo('BnaMvMalVpZ');
+  await instalink.terminate();
+  return r;
+}
+
+fetchImageInfo().then((r) => {
   console.log(r);
 });

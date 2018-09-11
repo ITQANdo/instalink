@@ -7,40 +7,63 @@ const puppeteer = require('puppeteer');
 Instagram scraping is tricky due to the nature of modern-day JS frameworks.
 The server doesn't return rendered HTML anymore. Instead it passes content,
 plus the rules of rendering it to the browser and leaves it for the browser.
-Because of that simply doing a smiple request doesn't return the desured result.
+Because of that simply doing a smiple request doesn't return the desured
+result.
 
-So we have to actually render the page first using a browser then pull out the info
+So we have to actually render the page first using a browser then pull out
+the info
 needed from it.
 
-One great way to render web pages using a controlled APIs set it Puppeteer.
-
-
-CSS Selector
-img.FFVAD
-
-U-A: Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4
-
-Instagram Post URL example: https://www.instagram.com/p/BnN7whpBHwC/
+One great way to render web pages is using a controlled APIs set it Puppeteer.
 
 **/
 
-async function getImageURL(postID) {
-  const browser = await puppeteer.launch({headless: true});
-  const page = await browser.newPage();
+let browser;
+let page;
+
+/**
+ * Initializes the Puppeteer process
+ */
+async function init() {
+  await console.log('|========= STARTING PUPPETEER PROCESS =========|');
+  browser = await puppeteer.launch({headless: true});
+  page = await browser.newPage();
+}
+
+/**
+ * Fetches an Instagram post information including
+ * the username of the publisher, the url for the raw image,
+ * the post description and the number of likes.
+ * @param  {String} postID The identifier of the post, found after /p/
+ * in the URL
+ * @return {Objecy}        Returns a json object started by `status`, followed
+ * by the fetched pieces of information.
+ */
+async function getImageInfo(postID) {
+  let log = await console.log(`|========= FETCHING /p/${postID} INFO =========|`);
+
   let postURL = `https://www.instagram.com/p/${postID}/`;
   await page.goto(postURL);
 
-  const imgURL = await page.evaluate(() => {
+  return await page.evaluate(() => {
     let imgElement = document.querySelector('img.FFVAD');
     if (imgElement !== null) {
-      return {"status": "OK", "Message": document.querySelector('img.FFVAD').src};
+      return {"status": "OK", "USERNAME": document.querySelector('.C4VMK a').textContent, "URL": document.querySelector('img.FFVAD').src, "TXT": document.querySelector('.C4VMK span').textContent, "LIKES": document.querySelector('.EDfFK span').textContent}
     } else {
-      return {"status": "ERROR", "Message": "Cannot find the image requested. Are you sure the post ID is correct?"}
+      return {"status": "ERROR"}
     }
   });
-
-  await browser.close();
-  return imgURL;
 };
 
-module.exports.getURL = getImageURL;
+/**
+ * Terminates the Puppeteer browser process.
+ */
+async function terminate() {
+  await console.log('|========= TERMINATING PUPPETEER PROCESS =========|');
+  await browser.close();
+  await console.log('|========= PROCESS TERMINATED. GOODBYE. =========|');
+}
+
+module.exports.init = init;
+module.exports.imageInfo = getImageInfo;
+module.exports.terminate = terminate;
