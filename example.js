@@ -6,7 +6,7 @@ const instalink = require('./index');
 
 async function fetchImageInfo() {
   await instalink.init();
-  let r = await instalink.imageInfo('BnaMvMalVpZ');
+  let r = await instalink.imageInfo('Bnm01q_nZpL');
   await instalink.terminate();
   return r;
 }

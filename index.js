@@ -48,7 +48,19 @@ async function getImageInfo(postID) {
   return await page.evaluate(() => {
     let imgElement = document.querySelector('img.FFVAD');
     if (imgElement !== null) {
-      return {"status": "OK", "USERNAME": document.querySelector('.C4VMK a').textContent, "URL": document.querySelector('img.FFVAD').src, "TXT": document.querySelector('.C4VMK span').textContent, "LIKES": document.querySelector('.EDfFK span').textContent}
+
+      let usernameSelector = document.querySelector('a.FPmhX');
+      let urlSelector = document.querySelector('img.FFVAD');
+      let txtSelector = document.querySelector('.C4VMK span');
+      let likesSelector = document.querySelector('.EDfFK span');
+
+      return {
+        "status": "OK",
+        "USERNAME": (usernameSelector !== null) ? usernameSelector.textContent : null,
+        "URL": (urlSelector !== null) ? urlSelector.src : null,
+        "TXT": (txtSelector !== null) ? txtSelector.textContent : null,
+        "LIKES": (likesSelector !== null) ? likesSelector.textContent : null
+      }
     } else {
       return {"status": "ERROR"}
     }
