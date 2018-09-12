@@ -26,7 +26,7 @@ let page;
  */
 async function init() {
   await console.log('|========= STARTING PUPPETEER PROCESS =========|');
-  browser = await puppeteer.launch({headless: false});
+  browser = await puppeteer.launch({headless: true});
   page = await browser.newPage();
 }
 
