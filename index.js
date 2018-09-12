@@ -111,12 +111,16 @@ async function getImageInfo(postID) {
         if (imgElement.length === 1) {
           // We have a single image
           resUrls.push(imgElement[0].src);
+          resType = "image";
         } else if (imgElement.length > 1) {
           // We have a multi image
           for (var i = 0; i < imgElement.length; i++) {
             resUrls.push(imgElement[i].src);
           }
+          resType = "multi-image";
         }
+        resStatus = "OK";
+        resMessage = "All seems good.";
 
       } else if (vidElement !== null) {
         // We have a video
