@@ -26,7 +26,7 @@ let page;
  */
 async function init() {
   await console.log('|========= STARTING PUPPETEER PROCESS =========|');
-  browser = await puppeteer.launch({headless: true});
+  browser = await puppeteer.launch({headless: false});
   page = await browser.newPage();
 }
 
@@ -55,7 +55,13 @@ async function getImageInfo(postID) {
   // the rest of the react content.
   // scraping React and other SPA framework pages is always a
   // pain in the butt.
-  await page.click('.Ls00D');
+
+  try {
+    await page.click('.Ls00D')
+  } catch(err) {
+    console.log(err);
+  }
+
   await page.click('.EDfFK span');
 
   return await page.evaluate(() => {
@@ -78,7 +84,6 @@ async function getImageInfo(postID) {
     if (postPageChecker.length > 0) {
 
       let usernameSelector = document.querySelector('a.FPmhX');
-      let urlsSelector;
       let descriptionSelector = document.querySelector('.C4VMK > span');
       let likesSelector = document.querySelector('.EDfFK span span');
       let videoLikesSelector = document.querySelector('.vJRqr > span');
@@ -102,11 +107,11 @@ async function getImageInfo(postID) {
 
       // Image and Video DOM selectors.
       let imgElement = document.querySelectorAll('img.FFVAD');
-      let vidElement = document.getElementsByTagName('video')[0];
+      let vidElement = document.querySelectorAll('video');
 
       // Next is to check whether it's an image, a multi image or a video
       // using the selectors above.
-      if (imgElement !== null) {
+      if (imgElement.length > 0) {
         // We have either an image or a multi-image
         if (imgElement.length === 1) {
           // We have a single image
@@ -122,10 +127,10 @@ async function getImageInfo(postID) {
         resStatus = "OK";
         resMessage = "All seems good.";
 
-      } else if (vidElement !== null) {
+      } else if (vidElement.length > 0) {
         // We have a video
         resType = "video";
-        resUrls.push(vidElement.src);
+        resUrls.push(vidElement[0].src);
         resStatus = "OK";
         resMessage = "All seems good.";
       } else {
@@ -144,9 +149,15 @@ async function getImageInfo(postID) {
       "USERNAME": resUsername,
       "URL": resUrls,
       "DESCRIPTION": resDescription,
-      "IMAGE_LIKES": resLikes,
-      "VIDEO_LIKES": resVideoLikes,
-      "VIDEO_VIEWS": resVideoViews
+      "IMAGE_LIKES": (resType === "video")
+        ? null
+        : resLikes,
+      "VIDEO_LIKES": (resType === "video")
+        ? resVideoLikes
+        : null,
+      "VIDEO_VIEWS": (resType === "video")
+        ? resVideoViews
+        : null
     }
 
   });
