@@ -43,27 +43,108 @@ async function getImageInfo(postID) {
   let log = await console.log(`|========= FETCHING /p/${postID} INFO =========|`);
 
   let postURL = `https://www.instagram.com/p/${postID}/`;
-  await page.goto(postURL);
+
+  const timeout = 30000;
+  const networkIdleTimeout = 500;
+  await Promise.all([
+    page.goto(postURL),
+    page.waitForNavigation({timeout, waitUntil: 'load'})
+  ]);
+
+  // Those two clicks are essential workarounds for loading
+  // the rest of the react content.
+  // scraping React and other SPA framework pages is always a
+  // pain in the butt.
+  await page.click('.Ls00D');
+  await page.click('.EDfFK span');
 
   return await page.evaluate(() => {
-    let imgElement = document.querySelector('img.FFVAD');
-    if (imgElement !== null) {
+    // DIV that contains of the post's elements.
+    let postPageChecker = document.getElementsByClassName('QBXjJ');
+
+    let resStatus = null;
+    let resMessage = null;
+    let resType = null;
+    let resUsername = null;
+    let resUrls = [];
+    let resDescription = null;
+    let resLikes = null;
+    let resVideoLikes = null
+    let resVideoViews = null;
+
+    // Query the div containing a single post's elements
+    // If there's more than 0 of this div (which is usually 0 or 1)
+    // then we landed on a post page
+    if (postPageChecker.length > 0) {
 
       let usernameSelector = document.querySelector('a.FPmhX');
-      let urlSelector = document.querySelector('img.FFVAD');
-      let txtSelector = document.querySelector('.C4VMK span');
-      let likesSelector = document.querySelector('.EDfFK span');
+      let urlsSelector;
+      let descriptionSelector = document.querySelector('.C4VMK > span');
+      let likesSelector = document.querySelector('.EDfFK span span');
+      let videoLikesSelector = document.querySelector('.vJRqr > span');
+      let viewsSelector = document.querySelector('.EDfFK span span');
 
-      return {
-        "status": "OK",
-        "USERNAME": (usernameSelector !== null) ? usernameSelector.textContent : null,
-        "URL": (urlSelector !== null) ? urlSelector.src : null,
-        "TXT": (txtSelector !== null) ? txtSelector.textContent : null,
-        "LIKES": (likesSelector !== null) ? likesSelector.textContent : null
+      resUsername = (usernameSelector !== null)
+        ? usernameSelector.textContent
+        : null;
+      resDescription = (descriptionSelector !== null)
+        ? descriptionSelector.textContent
+        : null;
+      resLikes = (likesSelector !== null)
+        ? likesSelector.textContent
+        : null;
+      resVideoLikes = (videoLikesSelector !== null)
+        ? videoLikesSelector.textContent
+        : null;
+      resVideoViews = (viewsSelector !== null)
+        ? viewsSelector.textContent
+        : null;
+
+      // Image and Video DOM selectors.
+      let imgElement = document.querySelectorAll('img.FFVAD');
+      let vidElement = document.getElementsByTagName('video')[0];
+
+      // Next is to check whether it's an image, a multi image or a video
+      // using the selectors above.
+      if (imgElement !== null) {
+        // We have either an image or a multi-image
+        if (imgElement.length === 1) {
+          // We have a single image
+          resUrls.push(imgElement[0].src);
+        } else if (imgElement.length > 1) {
+          // We have a multi image
+          for (var i = 0; i < imgElement.length; i++) {
+            resUrls.push(imgElement[i].src);
+          }
+        }
+
+      } else if (vidElement !== null) {
+        // We have a video
+        resType = "video";
+        resUrls.push(vidElement.src);
+        resStatus = "OK";
+        resMessage = "All seems good.";
+      } else {
+        resStatus = "ERROR";
+        resMessage = "Unknown Error. Missing page elements? Instagram changed their DOM names?";
       }
     } else {
-      return {"status": "ERROR"}
+      resStatus = "ERROR";
+      resMessage = "This destination doesn't seem to contain an instagram post."
     }
+
+    return {
+      "STATUS": resStatus,
+      "MESSAGE": resMessage,
+      "TYPE": resType,
+      "USERNAME": resUsername,
+      "URL": resUrls,
+      "DESCRIPTION": resDescription,
+      "IMAGE_LIKES": resLikes,
+      "VIDEO_LIKES": resVideoLikes,
+      "VIDEO_VIEWS": resVideoViews
+    }
+
   });
 };
 
@@ -74,6 +155,7 @@ async function terminate() {
   await console.log('|========= TERMINATING PUPPETEER PROCESS =========|');
   await browser.close();
   await console.log('|========= PROCESS TERMINATED. GOODBYE. =========|');
+  await console.log('|========= ============================ =========|');
 }
 
 module.exports.init = init;
